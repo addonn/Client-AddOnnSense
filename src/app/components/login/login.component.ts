@@ -1,111 +1,146 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, PLATFORM_ID, Inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { User } from '../../models/user';
-import { Storage } from '@ionic/storage';
 import { AppConstants } from '../../models/app.constants';
-import { UntypedFormControl, ReactiveFormsModule, UntypedFormGroup, Validators } from '@angular/forms';
-import { startOfDay } from 'date-fns';
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { AuthenticateService } from '../../services/authenticate.service';
 import { UserService } from '../../services/user.service';
 import { TranslateService } from '@ngx-translate/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { OAuthAuthenticationService } from '../../services/oauth.authenticate.service';
 import { Account } from '../../models/account';
+import { isPlatformBrowser } from '@angular/common';
+import { StorageService } from '../../services/storage.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule
+  ],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })
 export class LoginComponent implements OnInit {
-  form: UntypedFormGroup;
+  form: FormGroup;
   startUpLangauage: string;
-  loginInPrgress: boolean;
+  loginInPrgress: boolean = false;
+  private isBrowser: boolean;
+
   constructor(
-    private storage: Storage,
+    private storageService: StorageService,
     private router: Router,
     private route: ActivatedRoute,
     private authenticateService: AuthenticateService,
     private oauthService: OAuthAuthenticationService,
     private userService: UserService,
     private translate: TranslateService,
+    private fb: FormBuilder,
+    @Inject(PLATFORM_ID) platformId: Object
   ) {
-    const currentUser = new User(JSON.parse(localStorage.getItem(AppConstants.LOCALSTORAGE_KEY_LOGGEDIN_USER)!));
-    if (currentUser != null && currentUser.getAccount() != null && currentUser.getUsername() != null && currentUser.getSession() != null) {
-      this.form = new UntypedFormGroup({
-        customer: new UntypedFormControl(currentUser.getAccount(), [Validators.required])
-      });
-      
-      // this.startUpLangauage = currentUser.getStartupAppLanguage();
-      // if (this.startUpLangauage && this.startUpLangauage !== 'en') {
-      //   this.translate.resetLang(this.startUpLangauage);
-      //   this.translate.currentLang = '';
-      //   this.translate.use(this.startUpLangauage).toPromise().then(() => { });
-      // }
-      // let fromDate: Date = startOfDay(new Date());
-      //}
-    } else {
-      this.form = new UntypedFormGroup({
-        customer: new UntypedFormControl('', [Validators.required])
-      });
+    this.isBrowser = isPlatformBrowser(platformId);
+    this.initializeForm();
+  }
+
+  private async initializeForm() {
+    this.form = this.fb.group({
+      customer: ['']
+    });
+
+    if (this.isBrowser) {
+      try {
+        const userData = localStorage.getItem(AppConstants.LOCALSTORAGE_KEY_LOGGEDIN_USER);
+        if (userData) {
+          const currentUser = new User(JSON.parse(userData));
+          if (currentUser?.getAccount()) {
+            this.form.patchValue({
+              customer: currentUser.getAccount()
+            });
+          }
+        }
+      } catch (e) {
+        console.error('Error initializing form:', e);
+      }
     }
-    
-    localStorage.setItem(AppConstants.LOCALSTORAGE_KEY_STARTUP_SLIDES, 'true');
   }
 
   async ngOnInit() {
     const code = this.route.snapshot.queryParamMap.get('code');
     if (code) {
-      this.storage.get(AppConstants.LOCALSTORAGE_KEY_LOGGEDIN_USER).then((user: User) => {
-        let key = AppConstants.STORAGE_ACCOUNT.replace('{ACCOUNT}', user.account as string);
-        this.storage.get(key).then(async (account: Account) => {
-          await this.oauthService.exchangeCodeForToken(code, account /* account */);
-          this.router.navigate(['/main-window']); // 👈 Navigate after login
-        })
-      })
-      // const currentUser = new Account(JSON.parse(localStorage.getItem(AppConstants.STORAGE_ACCOUNT)!));
-    }
-  }
-
-  async onSubmit(event?: any) {
-    this.loginInPrgress = true;
-    if (this.form.valid) {
-
-      let user = this.createLoggedInUser(this.form.value.customer.trim(), this.form.value.username, this.form.value.password, this.startUpLangauage);
-      localStorage.setItem(AppConstants.LOCALSTORAGE_KEY_STARTUP_SLIDES, 'true');
-      console.log(this.storage.keys.length);
-      this.storage.set(AppConstants.LOCALSTORAGE_KEY_LOGGEDIN_USER, user);
-      // localStorage.setItem(AppConstants.LOCALSTORAGE_KEY_LOGGEDIN_USER, JSON.stringify(user));
       try {
-        let loggedInUser: User = await this.authenticateService.authenticate(this.form.value.customer.trim(), true, false);
-        console.log(loggedInUser);
-        if (loggedInUser != null) {
-          this.userService.getLoggedInUserDetails(loggedInUser).then((user: User) => {
-            console.log(this.storage.keys.length);
-            if (user) {
-              this.router.navigateByUrl('/main-window');
+        const userData = localStorage.getItem(AppConstants.LOCALSTORAGE_KEY_LOGGEDIN_USER);
+        if (userData) {
+          const currentUser = new User(JSON.parse(userData));
+          const customer = currentUser.getAccount();
+          if (customer) {
+            const key = AppConstants.STORAGE_ACCOUNT.replace('{ACCOUNT}', customer);
+            const account = await this.storageService.get(key);
+            if (account) {
+              console.log('Exchanging code for token...');
+              await this.oauthService.exchangeCodeForToken(code, account);
+              console.log('Token exchange successful');
+              await this.router.navigate(['/main-window']);
             }
-          }, error => {
-            this.loginInPrgress = false;
-          });
-        } else {
-          this.loginInPrgress = false;
+          }
         }
       } catch (error) {
-        this.loginInPrgress = false;
-        console.log(error.message);
+        console.error('Error during OAuth code exchange:', error);
       }
     }
-    return false;
   }
 
+  async onSubmit(event: Event) {
+    event.preventDefault();
+    console.log('Form submitted', this.form.value);
 
-  createLoggedInUser(customer: string, username: string, password: string, startupAppLanguage: string): User {
+    if (!this.isBrowser) {
+      return;
+    }
+
+    const customerValue = this.form.get('customer')?.value;
+    if (!customerValue) {
+      console.log('No customer value');
+      return;
+    }
+
+    this.loginInPrgress = true;
+    console.log('Starting login process...', customerValue);
+
+    try {
+      const user = this.createLoggedInUser(customerValue.trim());
+      localStorage.setItem(AppConstants.LOCALSTORAGE_KEY_STARTUP_SLIDES, 'true');
+      
+      await this.storageService.set(AppConstants.LOCALSTORAGE_KEY_LOGGEDIN_USER, user);
+      console.log('User stored in storage');
+
+      const loggedInUser = await this.authenticateService.authenticate(
+        customerValue.trim(),
+        true,
+        false
+      );
+      
+      console.log('User authenticated:', loggedInUser);
+      
+      if (loggedInUser) {
+        const userDetails = await this.userService.getLoggedInUserDetails(loggedInUser);
+        console.log('User details:', userDetails);
+        if (userDetails) {
+          await this.router.navigateByUrl('/main-window');
+        }
+      }
+    } catch (error) {
+      console.error('Error during login:', error);
+    } finally {
+      this.loginInPrgress = false;
+    }
+  }
+
+  private createLoggedInUser(customer: string): User {
     return new User({
       primarykey: 0,
-      username,
-      password,
+      username: '',
+      password: '',
       account: customer,
       loggedin: false,
       firstname: '',
@@ -119,7 +154,7 @@ export class LoginComponent implements OnInit {
       phonenumber: '',
       deviceid: '',
       session: '',
-      startupAppLanguage,
+      startupAppLanguage: '',
       role: '',
       refreshtoken: '',
       idtoken: '',

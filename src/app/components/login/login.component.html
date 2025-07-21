@@ -6,29 +6,40 @@
     </div>
     <div class="content" role="main">
         <div style="padding:20px;">
-            <!-- <h1 class="main-title">{{'login.title'|translate}}</h1>
-            <div class="sub-title">{{'login.subtitle'|translate}}</div> -->
             <h1 class="main-title">Log in</h1>
             <div class="sub-title">Log in to AI to continue.</div>
         </div>
 
-        <form [formGroup]="form"  (submit)="onSubmit($event)">
+        <form [formGroup]="form" (ngSubmit)="onSubmit($event)" class="login-form">
             <div class="login-fields">
                 <div class="form-field">
-                    <!-- <mat-label>Customer</mat-label> -->
-                    <div class='input-group'>
-                        <input  formControlName="customer" />
-                        <!-- <mat-icon svgIcon='profile'></mat-icon> -->
+                    <label for="customer">Customer</label>
+                    <div class="input-group">
+                        <input id="customer" 
+                               type="text" 
+                               formControlName="customer" 
+                               placeholder="Enter customer name" />
                     </div>
                 </div>
-                <!-- <p *ngIf="error" class="error">
-                    {{ error }}
-                </p> -->
             </div>
-            <button type="submit" mat-raised-button flex-button class="btn-large btn-block btn-round bg-accent-blue text-white" [disabled]="loginInPrgress">
-                <span button-text>Login</span>
-                <!-- <mat-icon svgIcon='arrow-right-white'></mat-icon> -->
+
+            <button type="submit" 
+                    [disabled]="loginInPrgress" 
+                    class="submit-button">
+                <span>{{ loginInPrgress ? 'Logging in...' : 'Login' }}</span>
             </button>
+
+            <!-- Debug information -->
+            <div class="debug-info" style="margin-top: 20px; font-size: 12px; color: #666;">
+                <p>Form Valid: {{ form.valid }}</p>
+                <p>Form Touched: {{ form.touched }}</p>
+                <p>Form Dirty: {{ form.dirty }}</p>
+                <p>Login In Progress: {{ loginInPrgress }}</p>
+                <p>Customer Value: {{ form.get('customer').value }}</p>
+                <p>Customer Valid: {{ form.get('customer').valid }}</p>
+                <p>Customer Touched: {{ form.get('customer').touched }}</p>
+                <p>Customer Errors: {{ form.get('customer').errors | json }}</p>
+            </div>
         </form>
     </div>
 </div>

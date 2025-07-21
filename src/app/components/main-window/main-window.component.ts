@@ -1,7 +1,7 @@
-import { Component, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
+import { Component, ViewChild, ElementRef, AfterViewChecked, PLATFORM_ID, Inject } from '@angular/core';
 import { HeaderComponent } from '../header/header.component';
 import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { VersionPopupComponent } from '../version-popup/version-popup.component';
 import { HttpClient } from '@angular/common/http';
@@ -32,11 +32,19 @@ export class MainWindowComponent implements AfterViewChecked {
   showWelcome: boolean = true;
   showVersionPopup: boolean = false;
   private shouldScroll: boolean = false;
-  private speechSynthesis: SpeechSynthesis;
+  private speechSynthesis: SpeechSynthesis | undefined;
   private currentUtterance: SpeechSynthesisUtterance | null = null;
+  private isBrowser: boolean;
 
-  constructor(private sanitizer: DomSanitizer, private http: HttpClient) {
-    this.speechSynthesis = window.speechSynthesis;
+  constructor(
+    private sanitizer: DomSanitizer, 
+    private http: HttpClient,
+    @Inject(PLATFORM_ID) platformId: Object
+  ) {
+    this.isBrowser = isPlatformBrowser(platformId);
+    if (this.isBrowser) {
+      this.speechSynthesis = window.speechSynthesis;
+    }
   }
 
   toggleVersionPopup(): void {

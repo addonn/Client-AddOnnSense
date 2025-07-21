@@ -5,6 +5,6 @@ import { MainWindowComponent } from './components/main-window/main-window.compon
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
-  { path: 'login', component: MainWindowComponent },
+  { path: 'login', component: LoginComponent },
   { path: 'main-window', component: MainWindowComponent },
 ];

@@ -33,6 +33,8 @@ export class OAuthAuthenticationService {
         }
 
         const currentUser: User = new User(JSON.parse(localStorage.getItem(AppConstants.LOCALSTORAGE_KEY_LOGGEDIN_USER)));
+        currentUser.setAccount(accountname);
+        localStorage.setItem(AppConstants.LOCALSTORAGE_KEY_LOGGEDIN_USER, JSON.stringify(currentUser));
         this.accountName = accountname;
         this.isreload = isreload;
 
@@ -114,34 +116,32 @@ export class OAuthAuthenticationService {
             code_verifier: account.getCodeVerifier(),
         });
 
-        // const response = await fetch(account.getLoginurl() + `${this.realm}/protocol/openid-connect/token`, {
-        //     method: 'POST',
-        //     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        //     body: body.toString(),
-        // });
-        const headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
-        const response = await firstValueFrom(
-            this.http.post<any>(
-                account.getLoginurl() + `${this.realm}/protocol/openid-connect/token`,
-                body.toString(),
-                { headers }
-            )
-        );
+        try {
+            const headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
+            const result = await firstValueFrom(
+                this.http.post<any>(
+                    account.getLoginurl() + `${this.realm}/protocol/openid-connect/token`,
+                    body.toString(),
+                    { headers }
+                )
+            );
 
+            console.log('Access Token:', result.access_token);
 
-        const result = await response.json();
-        console.log('Access Token:', result.access_token);
-
-        const currentUser: User = new User(JSON.parse(localStorage.getItem(AppConstants.LOCALSTORAGE_KEY_LOGGEDIN_USER)));
-        currentUser.setSession(result.access_token);
-        currentUser.setAccount(this.accountName);
-        currentUser.setLoggedin(true);
-        currentUser.setRefreshtoken(result.refresh_token);
-        currentUser.setIdtoken(result.id_token);
-        await this.isOAuthEnabled(currentUser);
-        localStorage.setItem(AppConstants.LOCALSTORAGE_KEY_LOGGEDIN_USER, JSON.stringify(currentUser));
-        await this.getUserDetails(currentUser);
-        return currentUser;
+            const currentUser: User = new User(JSON.parse(localStorage.getItem(AppConstants.LOCALSTORAGE_KEY_LOGGEDIN_USER)));
+            currentUser.setSession(result.access_token);
+            currentUser.setAccount(account.getCode());
+            currentUser.setLoggedin(true);
+            currentUser.setRefreshtoken(result.refresh_token);
+            currentUser.setIdtoken(result.id_token);
+            await this.isOAuthEnabled(currentUser);
+            localStorage.setItem(AppConstants.LOCALSTORAGE_KEY_LOGGEDIN_USER, JSON.stringify(currentUser));
+            await this.getUserDetails(currentUser);
+            return currentUser;
+        } catch (error) {
+            console.error('Error exchanging code for token:', error);
+            throw error;
+        }
     }
 
     async refreshAccessToken(account: Account, currentUser: User): Promise<User> {

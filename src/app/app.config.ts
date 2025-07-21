@@ -1,13 +1,23 @@
-import { ApplicationConfig, provideZoneChangeDetection, importProvidersFrom } from '@angular/core';
+import { APP_INITIALIZER, ApplicationConfig, provideZoneChangeDetection, importProvidersFrom } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { IonicStorageModule } from '@ionic/storage-angular';
 import { routes } from './app.routes';
-import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptors, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient, withInterceptors, withFetch } from '@angular/common/http';
 import { provideClientHydration } from '@angular/platform-browser';
 import { TranslateModule } from '@ngx-translate/core';
-// import { HttpRequestInterceptor } from './interceptors/http-request-interceptor';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { AwsSignature } from './interceptors/aws-signature';
+import { NetworkStatusService } from './services/networkstatus.service';
+import { ErrorDialogService } from './services/error-dialog.service';
+import { httpRequestInterceptor } from './interceptors/http-request-interceptor';
+import { Storage } from '@ionic/storage-angular';
+import { StorageService } from './services/storage.service';
+
+// Initialize storage
+export function initializeStorage(storageService: StorageService) {
+  return () => storageService.init();
+}
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -15,21 +25,37 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideClientHydration(),
 
-    // ✅ Correct way to register interceptor in Standalone app
+    // Register services needed by the interceptor
+    AwsSignature,
+    NetworkStatusService,
+    ErrorDialogService,
+    Storage,
+    StorageService,
+
+    // Initialize storage before app starts
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initializeStorage,
+      deps: [StorageService],
+      multi: true
+    },
+
+    // Configure HttpClient with interceptors
     provideHttpClient(
-      withInterceptorsFromDi()
+      withInterceptors([httpRequestInterceptor]),
+      withFetch()
     ),
-    // {
-    //   provide: HTTP_INTERCEPTORS,
-    //   useClass: HttpRequestInterceptor,
-    //   multi: true
-    // },
-    // ✅ Modules go in importProvidersFrom
+
+    // Modules go in importProvidersFrom
     importProvidersFrom(
       FormsModule,
       CommonModule,
-      IonicStorageModule.forRoot(),
+      IonicStorageModule.forRoot({
+        name: 'addonn_db'
+      }),
       TranslateModule.forRoot()
     )
   ]
 };
+
+console.log('Routes in app.config:', routes);

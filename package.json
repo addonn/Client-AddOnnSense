@@ -1,5 +1,5 @@
 {
-  "name": "client-add-onn-sense",
+  "name": "com.addonn.app.assistant",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
@@ -7,7 +7,7 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "serve:ssr:Client-AddOnnSense": "node dist/client-add-onn-sense/server/server.mjs"
+    "serve:ssr:Client-AddOnnSense": "node dist/com.addonn.app.assistant/server/server.mjs"
   },
   "private": true,
   "dependencies": {
@@ -25,15 +25,19 @@
     "@capacitor/browser": "^7.0.1",
     "@ionic/storage-angular": "^4.0.0",
     "@ngx-translate/core": "^16.0.4",
+    "buffer": "^6.0.3",
     "cordova-plugin-inappbrowser": "^6.0.0",
     "crypto-js": "^4.2.0",
     "date-fns": "^4.1.0",
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.2",
+    "jwt-encode": "^1.0.1",
     "my-workspace": "github:ngx-translate/core",
+    "next-tick": "^1.1.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
-    "zone.js": "~0.14.10"
+    "util": "^0.12.5",
+    "zone.js": "^0.14.10"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^18.2.20",
