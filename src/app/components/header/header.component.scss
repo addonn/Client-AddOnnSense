@@ -1,0 +1,30 @@
+.header {
+    background-color: #394566;
+    height: 60px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-heading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
+}
+
+.header-icon svg {
+    width: 32px;
+    height: auto;
+    margin-right: 10px;
+}
+
+.header-title {
+    color: white;
+    font-size: 24px;
+}
+.help-icon svg {
+    width: 24px;
+    height: auto;
+}

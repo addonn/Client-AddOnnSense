@@ -1,0 +1,156 @@
+<!-- <app-header></app-header> -->
+<div class="chat-container">
+    <!-- Header -->
+    <!-- <div class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo-icon">
+                    <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="1" y="1" width="78" height="78" rx="15" fill="#fff" />
+                        <rect x="1" y="1" width="78" height="78" rx="15" stroke="#E9F0FB" stroke-width="2" />
+                        <path
+                            d="m56.628 41.452-13.25-25.4c-1.426-2.731-5.334-2.731-6.76 0L16.45 54.71c-1.726 3.311 1.844 6.873 5.15 5.136l35.028-18.397v.003z"
+                            fill="#2B6CD9" />
+                        <path
+                            d="M63.554 54.726 43.377 16.049c-1.425-2.732-5.334-2.732-6.758 0L23.345 41.487 58.403 59.86c3.307 1.734 6.873-1.828 5.147-5.14l.004.005z"
+                            fill="#1FF1FF" />
+                        <path
+                            d="M43.377 16.052c-1.425-2.731-5.334-2.731-6.759 0l-15.963 30.6a5.807 5.807 0 0 1 7.837-2.46l11.475 6.011 16.66-8.75-13.25-25.4z"
+                            fill="#2CC7DD" />
+                    </svg>
+                </div>
+                <span class="app-title">AddOnn Assistant</span>
+            </div>
+            <button class="help-button" type="button">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
+                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M12 17h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                </svg>
+            </button>
+        </div>
+    </div> -->
+
+    <div class="header">
+        <div class="header-heading">
+            <div class="header-icon" (click)="toggleVersionPopup()">
+                <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="1" y="1" width="78" height="78" rx="15" fill="#fff"/>
+                    <rect x="1" y="1" width="78" height="78" rx="15" stroke="#E9F0FB" stroke-width="2"/>
+                    <path d="m56.628 41.452-13.25-25.4c-1.426-2.731-5.334-2.731-6.76 0L16.45 54.71c-1.726 3.311 1.844 6.873 5.15 5.136l35.028-18.397v.003z" fill="#2B6CD9"/>
+                    <path d="M63.554 54.726 43.377 16.049c-1.425-2.732-5.334-2.732-6.758 0L23.345 41.487 58.403 59.86c3.307 1.734 6.873-1.828 5.147-5.14l.004.005z" fill="#1FF1FF"/>
+                    <path d="M43.377 16.052c-1.425-2.731-5.334-2.731-6.759 0l-15.963 30.6a5.807 5.807 0 0 1 7.837-2.46l11.475 6.011 16.66-8.75-13.25-25.4z" fill="#2CC7DD"/>
+                </svg>
+            </div>
+            <div class="header-title"><span>AddOnn Assistant</span></div>
+        </div>
+        <div class="help-icon" id="help-icon" (click)="toggleVersionPopup()">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M10 18.3333H3.33335C2.41335 18.3333 1.66669 17.5867 1.66669 16.6667L1.66669 10C1.66669 5.39751 5.39835 1.66667 10 1.66667C14.6017 1.66667 18.3334 5.39751 18.3334 10C18.3334 14.6025 14.6017 18.3333 10 18.3333Z" stroke="#9CA5AD" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M10.2017 11.6467V11.5767C10.2017 11.0983 10.4234 10.7367 10.8317 10.445L11.31 10.1067C11.9984 9.61667 12.465 8.96333 12.465 8.04167C12.465 6.86333 11.52 5.72 9.71171 5.72C7.98504 5.72 7.04004 6.93333 7.04004 8.19333C7.04004 8.36833 7.05171 8.555 7.09837 8.71833L8.56837 8.77667C8.53337 8.67167 8.52171 8.54333 8.52171 8.40333C8.52171 7.75 8.88337 7.085 9.71171 7.085C10.4934 7.085 10.8784 7.59833 10.8784 8.135C10.8784 8.485 10.7267 8.8 10.3767 9.05667L9.81671 9.47667C9.15171 9.97833 8.89504 10.55 8.89504 11.1683C8.89504 11.3433 8.91837 11.495 8.94171 11.6467H10.2017ZM9.59504 14.26C10.1084 14.26 10.5284 13.8517 10.5284 13.3383C10.5284 12.825 10.1084 12.405 9.59504 12.405C9.08171 12.405 8.67337 12.825 8.67337 13.3383C8.67337 13.8517 9.08171 14.26 9.59504 14.26Z" fill="#9CA5AD"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Help Popup -->
+    <!-- <app-help-popup *ngIf="showHelpPopup" (close)="toggleHelpPopup()"></app-help-popup> -->
+
+    <!-- Version Popup -->
+    <app-version-popup *ngIf="showVersionPopup" (close)="toggleVersionPopup()"></app-version-popup>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="welcome-section" *ngIf="showWelcome">
+            <div class="main-logo">
+                <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="1" y="1" width="78" height="78" rx="15" fill="#fff" />
+                    <rect x="1" y="1" width="78" height="78" rx="15" stroke="#E9F0FB" stroke-width="2" />
+                    <path
+                        d="m56.628 41.452-13.25-25.4c-1.426-2.731-5.334-2.731-6.76 0L16.45 54.71c-1.726 3.311 1.844 6.873 5.15 5.136l35.028-18.397v.003z"
+                        fill="#2B6CD9" />
+                    <path
+                        d="M63.554 54.726 43.377 16.049c-1.425-2.732-5.334-2.732-6.758 0L23.345 41.487 58.403 59.86c3.307 1.734 6.873-1.828 5.147-5.14l.004.005z"
+                        fill="#1FF1FF" />
+                    <path
+                        d="M43.377 16.052c-1.425-2.731-5.334-2.731-6.759 0l-15.963 30.6a5.807 5.807 0 0 1 7.837-2.46l11.475 6.011 16.66-8.75-13.25-25.4z"
+                        fill="#2CC7DD" />
+                </svg>
+            </div>
+            <h1 class="welcome-title">Welcome to AddOnn Assist.</h1>
+            <p class="welcome-subtitle">How can I help you?</p>
+        </div>
+        <div class="messages-section" *ngIf="!showWelcome" #messagesContainer>
+            <div *ngFor="let msg of messages" class="message-row" [ngClass]="msg.sender === 'user' ? 'user-message-row' : 'bot-message-row'">
+                <div class="message-icon bot-icon" *ngIf="msg.sender === 'bot'">
+                    <svg width="32" height="32" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="1" y="1" width="78" height="78" rx="15" fill="#fff"/>
+                        <rect x="1" y="1" width="78" height="78" rx="15" stroke="#E9F0FB" stroke-width="2"/>
+                        <path d="m56.628 41.452-13.25-25.4c-1.426-2.731-5.334-2.731-6.76 0L16.45 54.71c-1.726 3.311 1.844 6.873 5.15 5.136l35.028-18.397v.003z" fill="#2B6CD9"/>
+                        <path d="M63.554 54.726 43.377 16.049c-1.425-2.732-5.334-2.732-6.758 0L23.345 41.487 58.403 59.86c3.307 1.734 6.873-1.828 5.147-5.14l.004.005z" fill="#1FF1FF"/>
+                        <path d="M43.377 16.052c-1.425-2.731-5.334-2.731-6.759 0l-15.963 30.6a5.807 5.807 0 0 1 7.837-2.46l11.475 6.011 16.66-8.75-13.25-25.4z" fill="#2CC7DD"/>
+                    </svg>
+                </div>
+                <div class="message-bubble" [ngClass]="msg.sender === 'user' ? 'user-bubble' : 'bot-bubble'">
+                    <span *ngIf="!msg.isHtml">{{ msg.text }}</span>
+                    <span *ngIf="msg.isHtml" [innerHTML]="msg.text"></span>
+                    <!-- <button *ngIf="msg.sender === 'bot'" class="speaker-button" (click)="toggleSpeech(msg)" [class.speaking]="msg.isSpeaking">
+                        <svg *ngIf="!msg.isSpeaking" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M11 5L6 9H2V15H6L11 19V5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M15.54 8.46C16.4774 9.39764 17.0039 10.6692 17.0039 12C17.0039 13.3308 16.4774 14.6024 15.54 15.54" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M19.07 4.93C20.9447 6.80527 21.9979 9.34835 21.9979 12C21.9979 14.6517 20.9447 17.1947 19.07 19.07" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <svg *ngIf="msg.isSpeaking" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M11 5L6 9H2V15H6L11 19V5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M23 9L17 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M17 9L23 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button> -->
+                </div>
+                <div class="message-icon user-icon" *ngIf="msg.sender === 'user'">
+                    <svg width="20px" height="22.0002px" viewBox="0 0 20 22.0002" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                        <title>24-person</title>
+                        <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round">
+                            <g id="24-person" transform="translate(1, 1)" stroke-width="2">
+                                <g id="icon">
+                                    <path d="M14,5 C14,7.761 11.762,10 9,10 C6.238,10 4,7.761 4,5 C4,2.239 6.238,0 9,0 C11.762,0 14,2.239 14,5 Z" id="Sub1" stroke="#2CC7DD"></path>
+                                    <path d="M3,11.3052 C1.163,12.9532 0,15.3382 0,18.0002 L0,20.0002 L18,20.0002 L18,18.0002 C18,15.3382 16.837,12.9532 15,11.3052" id="Base1" stroke="#2B55D9"></path>
+                                </g>
+                            </g>
+                        </g>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Message Input -->
+    <div class="message-input-container">
+        <div class="input-wrapper">
+            <input
+                type="text"
+                class="message-input"
+                placeholder="Write your message"
+                [(ngModel)]="messageText"
+                (keydown)="onKeyPress($event)"
+            />
+            <div class="clear-icon" id="clear-icon" *ngIf="messageText?.trim()"
+                (click)="clearMessage()">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="m12 4-8 8M4 4l8 8" stroke="#fff" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                </svg>
+            </div>
+            <button class="send-button" type="button" (click)="sendMessage()" [disabled]="!messageText?.trim()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="m3.597 18.908 2.173-7.014c.109-.354.109-.738 0-1.102L3.597 3.788c-.248-.786.585-1.485 1.359-1.15l15.867 6.966a1.89 1.89 0 0 1 0 3.488L4.956 20.058c-.774.345-1.608-.364-1.36-1.15z"
+                        stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M5.953 11.365h9.941" stroke="#fff" stroke-width="2.1" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                </svg>
+            </button>
+        </div>
+    </div>
+</div>

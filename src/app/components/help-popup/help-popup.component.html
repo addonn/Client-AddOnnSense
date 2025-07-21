@@ -1,0 +1,49 @@
+<div class="popup-overlay" (click)="onClose()">
+  <div class="popup-content" (click)="$event.stopPropagation()">
+    <button class="close-button" (click)="onClose()">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M13 1L1 13M1 1L13 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </button>
+    
+    <div class="popup-header">
+      <div class="logo">
+        <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="1" y="1" width="78" height="78" rx="15" fill="#fff"/>
+          <rect x="1" y="1" width="78" height="78" rx="15" stroke="#E9F0FB" stroke-width="2"/>
+          <path d="m56.628 41.452-13.25-25.4c-1.426-2.731-5.334-2.731-6.76 0L16.45 54.71c-1.726 3.311 1.844 6.873 5.15 5.136l35.028-18.397v.003z" fill="#2B6CD9"/>
+          <path d="M63.554 54.726 43.377 16.049c-1.425-2.732-5.334-2.732-6.758 0L23.345 41.487 58.403 59.86c3.307 1.734 6.873-1.828 5.147-5.14l.004.005z" fill="#1FF1FF"/>
+          <path d="M43.377 16.052c-1.425-2.731-5.334-2.731-6.759 0l-15.963 30.6a5.807 5.807 0 0 1 7.837-2.46l11.475 6.011 16.66-8.75-13.25-25.4z" fill="#2CC7DD"/>
+        </svg>
+      </div>
+      <h2>AddOnn Assistant 1.0</h2>
+      <p>AddOnn Assistant is an artificial intelligence tool developed by AddOnn BV.</p>
+    </div>
+
+    <div class="popup-body">
+      <div class="features">
+        <h3>Features:</h3>
+        <ul>
+          <li>Natural language processing for understanding queries</li>
+          <li>Real-time data analysis and visualization</li>
+          <li>Contextual responses based on your business data</li>
+          <li>Integration with AddOnn's suite of tools</li>
+        </ul>
+      </div>
+
+      <div class="usage">
+        <h3>How to use:</h3>
+        <ol>
+          <li>Type your question or request in the chat box</li>
+          <li>Press Enter or click the send button</li>
+          <li>Wait for the AI to process and respond</li>
+          <li>View the results in an easy-to-read format</li>
+        </ol>
+      </div>
+
+      <div class="support">
+        <p>For additional support or questions, contact our support team at support@addonn.com</p>
+      </div>
+    </div>
+  </div>
+</div> 

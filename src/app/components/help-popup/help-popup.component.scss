@@ -1,0 +1,135 @@
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+.popup-content {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 500px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  animation: slideIn 0.3s ease-in-out;
+}
+
+.close-button {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  color: #666;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: #f0f0f0;
+  }
+}
+
+.popup-header {
+  text-align: center;
+  margin-bottom: 24px;
+
+  .logo {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 16px;
+  }
+
+  h2 {
+    font-size: 24px;
+    color: #2d3748;
+    margin: 0 0 8px;
+  }
+
+  p {
+    color: #718096;
+    margin: 0;
+    font-size: 14px;
+  }
+}
+
+.popup-body {
+  color: #4a5568;
+
+  h3 {
+    color: #2d3748;
+    font-size: 18px;
+    margin: 24px 0 12px;
+  }
+
+  ul, ol {
+    margin: 0;
+    padding-left: 24px;
+  }
+
+  li {
+    margin-bottom: 8px;
+    line-height: 1.5;
+  }
+
+  .support {
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid #e2e8f0;
+    font-size: 14px;
+    color: #718096;
+    text-align: center;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Scrollbar styling */
+.popup-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.popup-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.popup-content::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+  &:hover {
+    background: #555;
+  }
+} 
