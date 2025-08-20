@@ -1,4 +1,4 @@
-import { Component, ViewChild, ElementRef, AfterViewChecked, PLATFORM_ID, Inject } from '@angular/core';
+import { Component, ViewChild, ElementRef, AfterViewChecked, PLATFORM_ID, Inject, OnInit, OnDestroy } from '@angular/core';
 import { HeaderComponent } from '../header/header.component';
 import { FormsModule } from '@angular/forms';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
@@ -6,28 +6,41 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { VersionPopupComponent } from '../version-popup/version-popup.component';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
+import { WsService, ChatMessage, ChartData } from '../../services/websocket.service';
+import { StorageService } from '../../services/storage.service';
+import { AppConstants } from '../../models/app.constants';
+import { User } from '../../models/user';
+import { jwtDecode } from 'jwt-decode';
+import { ChartComponent } from '../chart/chart.component';
+import { FloorMapComponent } from '../floor-map/floor-map.component';
+import floorSample from '../../../assets/mock/floorfeaturecollections.json'; // Sample floor map data
 
 @Component({
   selector: 'app-main-window',
   standalone: true,
   imports: [
-    HeaderComponent, 
-    CommonModule, 
-    FormsModule, 
-    VersionPopupComponent
+    HeaderComponent,
+    CommonModule,
+    FormsModule,
+    VersionPopupComponent,
+    ChartComponent,
+    FloorMapComponent
   ],
   templateUrl: './main-window.component.html',
   styleUrl: './main-window.component.scss'
 })
-export class MainWindowComponent implements AfterViewChecked {
+export class MainWindowComponent implements AfterViewChecked, OnInit, OnDestroy {
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
-  
+
   messageText: string = '';
-  messages: { 
-    text: string | SafeHtml; 
-    sender: 'user' | 'bot'; 
+  messages: {
+    text: any;
+    sender: 'user' | 'bot';
     isHtml?: boolean;
     isSpeaking?: boolean;
+    isChart?: boolean; // For chart messages
+    isFloorMap?: boolean; // For floor messages
+    floorMapData?: any; // For floor map data
   }[] = [];
   showWelcome: boolean = true;
   showVersionPopup: boolean = false;
@@ -35,17 +48,139 @@ export class MainWindowComponent implements AfterViewChecked {
   private speechSynthesis: SpeechSynthesis | undefined;
   private currentUtterance: SpeechSynthesisUtterance | null = null;
   private isBrowser: boolean;
+  private wsConnected: boolean = false;
+  private wsSubscription: any;
+  private wsStatusSubscription: any;
+  private backendProvider: string = '';
+  private packages: string[] = [];
+  private aimodels: string = '';
+  // Add class properties for assistant_id and vector_store_id
+  assistant_id: string = '';
+  vector_store_id: string = '';
+  thread_id: string = ''
+  floorQueryInProgress: boolean = false;
+  FLOOR_URL = 'https://addonn-test.planoncloud.com/services/sdk/platform/jaxrs/addonn/partner/cleanonnoperationsappconnect/addonn/floor/geojson/{floorNumber}';
+  floorGeoJson: any = null;
+
 
   constructor(
-    private sanitizer: DomSanitizer, 
+    private sanitizer: DomSanitizer,
     private http: HttpClient,
-    @Inject(PLATFORM_ID) platformId: Object
+    @Inject(PLATFORM_ID) platformId: Object,
+    private wsService: WsService,
+    private storageService: StorageService
   ) {
     this.isBrowser = isPlatformBrowser(platformId);
     if (this.isBrowser) {
       this.speechSynthesis = window.speechSynthesis;
     }
   }
+
+  ngOnInit() {
+    // Connect to WebSocket and subscribe to messages
+    this.wsService.connect();
+    this.getAccountDetails();
+    this.wsSubscription = this.wsService.onMessage().subscribe((msg: ChatMessage) => {
+      this.showWelcome = false;
+      let displayText: string | SafeHtml = msg.content;
+      // Track assistant/vector store IDs
+      console.log('Messages:', JSON.stringify(this.messages, null, 2));
+      console.log('Current message:', JSON.stringify(msg, null, 2));
+      if (msg.assistant_id) {
+        this.assistant_id = msg.assistant_id;
+      }
+      if (msg.vector_store_id) {
+        this.vector_store_id = msg.vector_store_id;
+      }
+      if (msg.thread_id) {
+        this.thread_id = msg.thread_id;
+      }  
+      console.log('Thread ID:', this.thread_id);
+      console.log('Assistant ID:', this.assistant_id);
+      console.log('Vector Store ID:', this.vector_store_id);
+
+      if (!msg.isDone) {
+        // Streaming in progress
+        const lastBotMsg = this.messages[this.messages.length - 1];
+        if (lastBotMsg && lastBotMsg.sender === 'bot' && !lastBotMsg.isHtml) {
+          lastBotMsg.text = msg.content;
+        } else {
+          // First stream chunk – push new message
+          this.messages.push({
+            text: msg.chartData?.data || msg.content,
+            sender: 'bot',
+            isHtml: false,
+            isChart: !!msg.chartData
+          });
+        }
+
+        this.shouldScroll = true;
+
+      } else if (msg.type === 'done') {
+        // Streaming finished, do nothing or mark complete
+      }
+
+      // if(!msg.isDone){
+      //   accumulatedText=accumulatedText+' '+msg.content
+      // }else{
+      //   this.messages.push({
+      //     text: displayText,
+      //     sender: msg.type === 'user' ? 'user' : 'bot',
+      //     isHtml: false
+      //   });
+      // }
+
+      this.shouldScroll = true;
+    });
+    this.wsStatusSubscription = this.wsService.onConnectionStatus().subscribe((status: boolean) => {
+      this.wsConnected = status;
+    });
+  }
+
+
+
+
+  ngOnDestroy() {
+    if (this.wsSubscription) this.wsSubscription.unsubscribe();
+    if (this.wsStatusSubscription) this.wsStatusSubscription.unsubscribe();
+    this.wsService.disconnect();
+  }
+
+
+  async getAccountDetails() {
+    const userData = localStorage.getItem(AppConstants.LOCALSTORAGE_KEY_LOGGEDIN_USER);
+    if (userData) {
+      const currentUser = new User(JSON.parse(userData));
+      const customer = currentUser.getAccount();
+
+      if (customer) {
+        const key = AppConstants.STORAGE_ACCOUNT.replace('{ACCOUNT}', customer);
+        const account = await this.storageService.get(key);
+
+        const license = account?.license;
+
+        if (license) {
+          console.log('🔐 Decoding license token:', license);
+
+          try {
+            const decoded: any = jwtDecode(license);
+
+            this.backendProvider = decoded.backendProvider;
+            this.packages = decoded.packages || [];
+            this.aimodels = decoded.aimodel?.[0]?.name || '';
+
+            console.log('✅ backendProvider:', this.backendProvider);
+            console.log('✅ packages:', this.packages);
+            console.log('✅ ai models:', this.aimodels);
+
+          } catch (err) {
+            console.error('❌ Error decoding JWT license:', err);
+          }
+        }
+      }
+    }
+  }
+
 
   toggleVersionPopup(): void {
     this.showVersionPopup = !this.showVersionPopup;
@@ -63,7 +198,7 @@ export class MainWindowComponent implements AfterViewChecked {
   //       }
   //     });
   //     this.stopSpeaking();
-      
+
   //     // Start speaking this message
   //     let text = '';
   //     if (typeof message.text === 'string') {
@@ -79,7 +214,7 @@ export class MainWindowComponent implements AfterViewChecked {
   //     utterance.onend = () => {
   //       message.isSpeaking = false;
   //     };
-      
+
   //     this.currentUtterance = utterance;
   //     this.speechSynthesis.speak(utterance);
   //     message.isSpeaking = true;
@@ -98,7 +233,7 @@ export class MainWindowComponent implements AfterViewChecked {
   // }
 
   ngAfterViewChecked() {
-    if (this.shouldScroll) {
+    if (this.shouldScroll && this.messagesContainer) {
       this.scrollToBottom();
       this.shouldScroll = false;
     }
@@ -106,9 +241,10 @@ export class MainWindowComponent implements AfterViewChecked {
 
   private scrollToBottom(): void {
     try {
+      if (!this.messagesContainer) return;
       const container = this.messagesContainer.nativeElement;
       container.scrollTop = container.scrollHeight;
-    } catch(err) {
+    } catch (err) {
       console.error('Error scrolling to bottom:', err);
     }
   }
@@ -121,138 +257,116 @@ export class MainWindowComponent implements AfterViewChecked {
   }
 
   async sendMessage() {
-    if (this.messageText?.trim()) {
-      // Add user message
-      this.messages.push({ text: this.messageText, sender: 'user' });
-      this.showWelcome = false;
-      this.shouldScroll = true;
-      
-      // Store message and clear input
-      const userRequest = this.messageText;
-      this.messageText = '';
+    const userInput = this.messageText?.trim();
+    console.log('floorSample', floorSample);
+    console.log('Sending message:', userInput);
+    if (!userInput) return;
 
-      try {
-        // Add processing message
-        this.messages.push({ 
-          text: "Processing your request. Your data will be available shortly.", 
-          sender: 'bot' 
-        });
-        this.shouldScroll = true;
-
-        // Encode the query and create URL
-        const encodedQuery = encodeURIComponent(userRequest);
-        const url = `/services/sdk/platform/jaxrs/addonn/partner/cleanonnoperationsappconnect/addonn/assisstance/result?query=${encodedQuery}`;
-
-        // Make the GET request
-        const response = await fetch(url, {
-          method: 'GET'
-        });
-        this.http.get(environment.AWS_URL + url).subscribe(async (response: any) => {
-          
-        })
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
-        const rawResult = await response.text();
-        console.log("Raw result:", rawResult);
-
-        // Create table HTML and sanitize it
-        const tableHTML = this.createTable(rawResult);
-        const sanitizedHtml = this.sanitizer.bypassSecurityTrustHtml(tableHTML);
-
-        // Process the response and add it to messages
-        this.processLargeResponse(rawResult);
-        this.messages.push({ 
-          text: sanitizedHtml, 
-          sender: 'bot',
-          isHtml: true 
-        });
-        this.shouldScroll = true;
-
-      } catch (error) {
-        console.error("Error fetching query result:", error);
-        this.messages.push({ 
-          text: "❌ Error occurred while fetching the query result.", 
-          sender: 'bot' 
-        });
-        this.shouldScroll = true;
-      }
-    }
-  }
-
-  private createTable(data: string): string {
-    // Split the data into lines (rows)
-    const lines = data.trim().split('\n').filter(line => line.trim() !== '');
-    if (lines.length === 0) return '';
-
-    // Parse the first line to determine headers and column positions
-    const headerLine = lines[0];
-    const colPositions: number[] = [];
-    const headers: string[] = [];
-
-    // Use a regular expression to find non-whitespace sequences (words) and their positions
-    let lastPos = 0;
-    headerLine.replace(/\S+/g, (match, offset) => {
-      colPositions.push(offset); // Start position of each column
-      headers.push(match.trim()); // Header name
-      lastPos = offset + match.length;
-      return match; // Need to return the match to satisfy TypeScript
+    this.messages.push({
+      text: userInput,
+      sender: 'user',
+      isHtml: false
     });
-    colPositions.push(headerLine.length); // End position of the last column
 
-    // The number of columns is the number of headers
-    const numColumns = headers.length;
+    this.showWelcome = false;
+    this.shouldScroll = true;
 
-    // Parse each subsequent line into rows based on column positions
-    const rows: string[][] = [];
-    for (let i = 1; i < lines.length; i++) {
-      const rowText = lines[i];
-      const row: string[] = [];
+    if (this.floorQueryInProgress) {
+      // Step 2: Capture floor number and fetch geoJSON
+      const floorNumber = userInput;
 
-      // Split the row into columns based on the positions from the header line
-      for (let j = 0; j < numColumns; j++) {
-        const start = colPositions[j];
-        const end = colPositions[j + 1];
-        // Extract the cell value between the start and end positions
-        const cellValue = rowText.substring(start, end).trim();
-        row.push(cellValue || ''); // Use empty string if no value
-      }
+      this.floorGeoJson = floorSample;
+      this.messages.push({
+        isFloorMap: true,
+        floorMapData: floorSample,
+        sender: 'bot',
+        text: undefined
+      });
 
-      // Only add the row if it has the correct number of columns
-      if (row.length === numColumns) {
-        rows.push(row);
-      }
+      // this.messages.push({
+      //   text: '',
+      //   sender: 'bot',
+      //   isHtml: false,
+      //   isChart: false,
+      //   isFloorMap: true,
+      //    floorMapData: this.floorGeoJson,
+      // });
+       this.floorQueryInProgress = false;
+      // this.messages.push({
+      //   text: `Here is the map for floor ${floorNumber}:`,
+      //   sender: 'bot',
+      //   isHtml: false,
+      //   isFloorMap: true
+      // });
+     
+      // const url = this.FLOOR_URL.replace('{floorNumber}', floorNumber) + `?accesskey=eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzUxMiJ9.eyJzdWIiOiJNQVJDIiwicG5BdXRvR2VuZXJhdGVkIjpmYWxzZSwiaXNzIjoiUGxhbm9uIFNvZnR3YXJlIiwiZXhwIjoxODkzNTYwNjQwLCJpYXQiOjE3MzcxNzY2Njl9.fsDAFx_z7zAC4FMM8HluP7mN8snyv5cg5tH-oR177XO2ugGpwgbB6CojoiqWsU2WFpSNSDmm2N1II2EBOV_ZgRcMDUALBOBElgtsgSXQjXTd9qlmBz2C_abJvi46L2xNNugJqsPaGz-qjDH8HE1M1C4vKR3GrUoYaXQ6BSgzRYuDUEKkrjRls6U_VD8wz6KdoLxZJ2GllCszjUDSLHKNw4wVZoeKq0KdrFS62LvaRL5D4_MOsVoaU9Ospeim5Fi3l7_zbtiIsD_hojxviR1J3SVqoCGqmOsciR8lKqfYeQZjpgzbcsRJ9-UmFmq4EglFUUG-4V90i5nuwQc9sKnupg`;
+      // this.floorGeoJson = null; // Reset previous floor map
+      // try {
+      //   const res = await fetch(url);
+      //   const json = await res.json();
+
+      //   this.floorGeoJson = json;
+      //   this.floorGeoJson = floorSample;
+      //   console.log('Floor GeoJSON:', this.floorGeoJson);
+      //   this.floorQueryInProgress = false;
+
+      //   this.messages.push({
+      //     text: `Here is the map for floor ${floorNumber}:`,
+      //     sender: 'bot',
+      //     isHtml: false,
+      //     isFloorMap: true
+      //   });
+
+      // } catch (err) {
+      //   this.messages.push({
+      //     text: `❌ Failed to load floor ${floorNumber}. Try again later.`,
+      //     sender: 'bot',
+      //     isHtml: false
+      //   });
+      //   this.floorQueryInProgress = false;
+      // }
+
+      this.messageText = '';
+      return;
     }
 
-    // Build the HTML table with Bootstrap classes
-    let html = '<table class="table table-striped table-bordered">';
-    // Add header row
-    html += '<thead><tr>' + headers.map(h => `<th>${this.escapeHtml(h)}</th>`).join('') + '</tr></thead>';
+    if (userInput.toLowerCase() === 'floor') {
+      this.floorQueryInProgress = true;
+      this.messages.push({
+        text: '🧭 Which floor number would you like to see?',
+        sender: 'bot',
+        isHtml: false
+      });
 
-    // Add data rows
-    html += '<tbody>';
-    for (const row of rows) {
-      html += '<tr>' + row.map(cell => `<td>${this.escapeHtml(cell)}</td>`).join('') + '</tr>';
+      this.messageText = '';
+      return;
     }
-    html += '</tbody></table>';
 
-    return html;
-  }
+    // Otherwise, send regular assistant message
+    // {"type": "openai_ids", "openai_info":
+    //    {"assistant_id": "asst_Oos9dR6WsdEnLLrYPsAuhV97", 
+    //     "vector_store_id": "", 
+    //     "thread_id": "thread_zPyYu9M5DFOjGDoXhjEN0wTU", "file_id": ""}}
+    const payload = {
+      action: 'sendMessage',
+      data: {
+        provider: 'openai',
+        message: userInput,
+        backend_url: 'https://addonndev-dev.planoncloud.com/services/sdk/platform/jaxrs/addonn/partner/cleanonnoperationsappconnect/addonn/assisstance/clientQueryBuilder',
+        //this token for test environment only for floor map data 
+        backend_token: '',
+        assistant_id: this.assistant_id || '',
+        vector_store_id: this.vector_store_id || '',
+        thread_id: this.thread_id || '',
+        backendProvider: this.backendProvider,
+        packages: this.packages,
+        aimodels: this.aimodels
+      }
+    };
 
-  private processLargeResponse(response: string): void {
-    // Implement any additional processing logic here
-    console.log('Processing response:', response);
-  }
-
-  private escapeHtml(unsafe: string): string {
-    return unsafe
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
+    this.wsService.sendPayload(payload);
+    this.messageText = '';
+    this.shouldScroll = true;
   }
 
   clearMessage(): void {

@@ -28,6 +28,7 @@
               "src/assets"
             ],
             "styles": [
+              "node_modules/leaflet/dist/leaflet.css",
               "src/styles.scss"
             ],
             "scripts": []
@@ -42,8 +43,13 @@
                 },
                 {
                   "type": "anyComponentStyle",
+<<<<<<< HEAD
+                  "maximumWarning": "6kb",
+                  "maximumError": "6.5kb"
+=======
                   "maximumWarning": "2kb",
-                  "maximumError": "4kb"
+                  "maximumError": "6kb"
+>>>>>>> d105b9c1c33c28991e888d963ffc2aa951733c6e
                 }
               ],
               "outputHashing": "all"
@@ -85,6 +91,7 @@
               "src/assets"
             ],
             "styles": [
+              "node_modules/leaflet/dist/leaflet.css",
               "src/styles.scss"
             ],
             "scripts": []

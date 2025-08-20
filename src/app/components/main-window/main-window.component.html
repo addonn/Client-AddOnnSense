@@ -1,38 +1,5 @@
 <!-- <app-header></app-header> -->
 <div class="chat-container">
-    <!-- Header -->
-    <!-- <div class="header">
-        <div class="header-content">
-            <div class="logo-section">
-                <div class="logo-icon">
-                    <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <rect x="1" y="1" width="78" height="78" rx="15" fill="#fff" />
-                        <rect x="1" y="1" width="78" height="78" rx="15" stroke="#E9F0FB" stroke-width="2" />
-                        <path
-                            d="m56.628 41.452-13.25-25.4c-1.426-2.731-5.334-2.731-6.76 0L16.45 54.71c-1.726 3.311 1.844 6.873 5.15 5.136l35.028-18.397v.003z"
-                            fill="#2B6CD9" />
-                        <path
-                            d="M63.554 54.726 43.377 16.049c-1.425-2.732-5.334-2.732-6.758 0L23.345 41.487 58.403 59.86c3.307 1.734 6.873-1.828 5.147-5.14l.004.005z"
-                            fill="#1FF1FF" />
-                        <path
-                            d="M43.377 16.052c-1.425-2.731-5.334-2.731-6.759 0l-15.963 30.6a5.807 5.807 0 0 1 7.837-2.46l11.475 6.011 16.66-8.75-13.25-25.4z"
-                            fill="#2CC7DD" />
-                    </svg>
-                </div>
-                <span class="app-title">AddOnn Assistant</span>
-            </div>
-            <button class="help-button" type="button">
-                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
-                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round" />
-                    <path d="M12 17h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round" />
-                </svg>
-            </button>
-        </div>
-    </div> -->
-
     <div class="header">
         <div class="header-heading">
             <div class="header-icon" (click)="toggleVersionPopup()">
@@ -82,7 +49,7 @@
             <p class="welcome-subtitle">How can I help you?</p>
         </div>
         <div class="messages-section" *ngIf="!showWelcome" #messagesContainer>
-            <div *ngFor="let msg of messages" class="message-row" [ngClass]="msg.sender === 'user' ? 'user-message-row' : 'bot-message-row'">
+            <div *ngFor="let msg of messages; let i = index" class="message-row" [ngClass]="msg.sender === 'user' ? 'user-message-row' : 'bot-message-row'">
                 <div class="message-icon bot-icon" *ngIf="msg.sender === 'bot'">
                     <svg width="32" height="32" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <rect x="1" y="1" width="78" height="78" rx="15" fill="#fff"/>
@@ -92,7 +59,7 @@
                         <path d="M43.377 16.052c-1.425-2.731-5.334-2.731-6.759 0l-15.963 30.6a5.807 5.807 0 0 1 7.837-2.46l11.475 6.011 16.66-8.75-13.25-25.4z" fill="#2CC7DD"/>
                     </svg>
                 </div>
-                <div class="message-bubble" [ngClass]="msg.sender === 'user' ? 'user-bubble' : 'bot-bubble'">
+                <div class="message-bubble" [ngClass]="msg.sender === 'user' ? 'user-bubble' : 'bot-bubble'" *ngIf="!msg.isChart && !msg.isFloorMap">
                     <span *ngIf="!msg.isHtml">{{ msg.text }}</span>
                     <span *ngIf="msg.isHtml" [innerHTML]="msg.text"></span>
                     <!-- <button *ngIf="msg.sender === 'bot'" class="speaker-button" (click)="toggleSpeech(msg)" [class.speaking]="msg.isSpeaking">
@@ -108,6 +75,17 @@
                         </svg>
                     </button> -->
                 </div>
+                <div *ngIf="msg.isChart" class="message-bubble" [ngClass]="msg.sender === 'user' ? 'user-bubble' : 'bot-bubble'">
+                    <app-chart [chartData]="msg.text"></app-chart>
+                </div>
+                <div *ngIf="msg.isFloorMap" class="message-bubble" [ngClass]="msg.sender === 'user' ? 'user-bubble' : 'bot-bubble'">
+                    <app-floor-map 
+                    [floorGeoJson]="msg.floorMapData"
+                    [mapId]="'map-' + i">
+                    </app-floor-map>
+                </div>
+
+
                 <div class="message-icon user-icon" *ngIf="msg.sender === 'user'">
                     <svg width="20px" height="22.0002px" viewBox="0 0 20 22.0002" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                         <title>24-person</title>
