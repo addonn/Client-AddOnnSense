@@ -9,3 +9,8 @@ docker buildx build --platform linux/amd64 --load -t 945942154263.dkr.ecr.eu-cen
 docker tag client_addonnsense:latest:latest 945942154263.dkr.ecr.eu-central-1.amazonaws.com/client_addonnsense:latest
 
 docker push 945942154263.dkr.ecr.eu-central-1.amazonaws.com/client_addonnsense:latest
+
+docker buildx build --platform linux/amd64 --load -t sapydi/client_addonnsense:latest .
+docker tag client_addonnsense:latest sapydi/client_addonnsense:latest
+
+docker push sapydi/client_addonnsense:latest
