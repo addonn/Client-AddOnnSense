@@ -1,0 +1,17 @@
+.map-container {
+  width: 100%;
+  height: 400px;
+  min-height: 300px;
+  position: relative;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+
+.floor-label {
+  font-weight: bold;
+  color: #333;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
