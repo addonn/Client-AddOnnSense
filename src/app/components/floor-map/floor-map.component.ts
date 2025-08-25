@@ -1,6 +1,6 @@
-import { Component, Input, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, Input, AfterViewInit, OnDestroy, OnInit } from '@angular/core';
 import * as L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+import { Init } from 'v8';
 
 
 @Component({
@@ -9,13 +9,21 @@ import 'leaflet/dist/leaflet.css';
   templateUrl: './floor-map.component.html',
   styleUrls: ['./floor-map.component.scss']
 })
-export class FloorMapComponent implements AfterViewInit, OnDestroy {
+export class FloorMapComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() floorGeoJson!: any;
   @Input() mapId!: string;
 
   private map!: L.Map;
 
-  
+  ngOnInit(): void {
+    // Fix Leaflet default icons
+  delete (L.Icon.Default.prototype as any)._getIconUrl;
+    L.Icon.Default.mergeOptions({
+      iconRetinaUrl: 'assets/leaflet/marker-icon-2x.png',
+      iconUrl: 'assets/leaflet/marker-icon.png',
+      shadowUrl: 'assets/leaflet/marker-shadow.png',
+    });
+  }
 
   ngAfterViewInit(): void {
     setTimeout(() => this.initMap(), 0); // Wait for DOM to be ready
