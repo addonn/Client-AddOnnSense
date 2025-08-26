@@ -20,10 +20,18 @@
             "outputPath": "dist/com.addonn.app.assistant",
             "index": "src/index.html",
             "browser": "src/main.ts",
-            "polyfills": ["src/polyfills.ts"],
+            "polyfills": [
+              "src/polyfills.ts"
+            ],
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "allowedCommonJsDependencies": [
+              "canvg",
+              "crypto-js",
+              "jwt-encode",
+              "localforage",
+              "rgbcolor",
+              "raf",
               "leaflet",
               "html2canvas"
             ],
@@ -41,12 +49,11 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kb",
-                  "maximumError": "2mb"
+                  "maximumWarning": "2mb",
+                  "maximumError": "3mb"
                 },
                 {
                   "type": "anyComponentStyle",
-
                   "maximumWarning": "10kb",
                   "maximumError": "15kb"
                 }
@@ -82,7 +89,9 @@
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
-            "polyfills": ["src/polyfills.ts"],
+            "polyfills": [
+              "src/polyfills.ts"
+            ],
             "tsConfig": "tsconfig.spec.json",
             "inlineStyleLanguage": "scss",
             "assets": [

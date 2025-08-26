@@ -14,7 +14,7 @@ RUN npm ci --no-audit --no-fund
 COPY . .
 
 # Build Angular app (Angular 18 works fine on Node 18)
-RUN npm run build --prod
+RUN npm run build --production
 
 # Stage 2: Serve app with Nginx
 FROM nginx:alpine
