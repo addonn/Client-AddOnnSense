@@ -15,7 +15,7 @@ import { Storage } from '@ionic/storage';
 export class OAuthAuthenticationService {
     private clientId = 'AddOnn-Mobile-Client';
     private realm = 'planon';
-    private redirectUri = 'https://aiassistant.add-onn.com/login';
+    private redirectUri = 'https://aiassistant.add-onn.com';
     private codeVerifier = '';
     accountName: string = null;
     isreload = false;
