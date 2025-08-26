@@ -1,30 +1,29 @@
-# Step 1: Use an official Node.js image to install dependencies
+# Stage 1: Build Angular app
 FROM node:18 AS build
 
-# Step 2: Set the working directory inside the container
+# Set working directory
 WORKDIR /app
 
-# Step 3: Copy the package.json and package-lock.json files to install dependencies
+# Copy package.json and package-lock.json first (better for caching)
 COPY package*.json ./
 
-# Step 4: Install the dependencies
-RUN npm install
+# Install all dependencies (including dev, needed for ng build)
+RUN npm ci --no-audit --no-fund
 
-# Step 5: Copy the rest of the application files into the container
+# Copy the rest of the application code
 COPY . .
 
-# Step 6: Build the Angular app
+# Build Angular app (Angular 18 works fine on Node 18)
 RUN npm run build --prod
 
-# Step 7: Use a smaller image for serving the app
+# Stage 2: Serve app with Nginx
 FROM nginx:alpine
 
-# Step 8: Copy the built Angular app to Nginx's default directory for serving static files
+# Copy the built Angular dist into Nginx html folder
 COPY --from=build /app/dist/com.addonn.app.assistant/browser /usr/share/nginx/html
 
-# Step 9: Expose port 80 to access the app
+# Expose port 80
 EXPOSE 80
 
-# Step 10: Start Nginx to serve the Angular app
+# Start Nginx
 CMD ["nginx", "-g", "daemon off;"]
- 
