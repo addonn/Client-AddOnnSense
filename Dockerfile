@@ -19,10 +19,13 @@ RUN npm run build --production
 # Stage 2: Serve app with Nginx
 FROM nginx:alpine
 
-# Copy the built Angular dist into Nginx html folder
-COPY --from=build /app/dist/com.addonn.app.assistant/browser /usr/share/nginx/html
+# Remove the default config
+RUN rm /etc/nginx/conf.d/default.conf
 
 COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Copy the built Angular dist into Nginx html folder
+COPY --from=build /app/dist/com.addonn.app.assistant/browser /usr/share/nginx/html
 
 # Expose port 80
 EXPOSE 80
