@@ -27,6 +27,11 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 # Copy the built Angular dist into Nginx html folder
 COPY --from=build /app/dist/com.addonn.app.assistant/browser /usr/share/nginx/html
 
+# Debug: print out the config to confirm it's copied
+RUN echo "===== Printing nginx.conf inside image =====" && \
+    cat /etc/nginx/conf.d/default.conf && \
+    echo "===== END ====="
+
 # Expose port 80
 EXPOSE 80
 
