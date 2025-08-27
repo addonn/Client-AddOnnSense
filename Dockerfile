@@ -22,6 +22,8 @@ FROM nginx:alpine
 # Copy the built Angular dist into Nginx html folder
 COPY --from=build /app/dist/com.addonn.app.assistant/browser /usr/share/nginx/html
 
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
 # Expose port 80
 EXPOSE 80
 
