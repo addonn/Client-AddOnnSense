@@ -7,8 +7,8 @@ WORKDIR /app
 # Copy package.json and package-lock.json first (better for caching)
 COPY package*.json ./
 
-# Install all dependencies (including dev, needed for ng build)
-# RUN npm ci --no-audit --no-fund
+# Install all dependencies (inside container, so Linux binaries are used)
+RUN npm ci --no-audit --no-fund
 
 # Copy the rest of the application code
 COPY . .
