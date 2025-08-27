@@ -1,10 +1,10 @@
 name: AIAssistant - Build and Push to Docker Hub
 
 on:
-  workflow_dispatch: # Allows manual trigger
+  workflow_dispatch: # manual trigger
   # push:
   #  branches:
-  #    - master
+  #    - master   # uncomment if you want auto-build on master
 
 env:
   IMAGE_NAME: sapydi/aiassistant-web
@@ -12,6 +12,7 @@ env:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -22,10 +23,20 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Set Docker image tag
+        id: vars
+        run: |
+          SHORT_SHA=$(echo "${GITHUB_SHA}" | cut -c1-7)
+          TAG=$(date +%Y%m%d%H%M%S)-$SHORT_SHA
+          echo "TAG=$TAG" >> $GITHUB_ENV
+          echo "TAG=$TAG" >> $GITHUB_OUTPUT
+
       - name: Build and push Docker images
         run: |
-          TAG=$(date +%Y%m%d%H%M%S)-${GITHUB_SHA::7}
-          echo "Tagging image as $TAG and latest"
-          docker build -t $IMAGE_NAME:$TAG -t $IMAGE_NAME:latest .
+          echo "Building image with tag: $TAG"
+          docker build \
+            --build-arg GIT_SHA=$GITHUB_SHA \
+            -t $IMAGE_NAME:$TAG \
+            -t $IMAGE_NAME:latest .
           docker push $IMAGE_NAME:$TAG
           docker push $IMAGE_NAME:latest
