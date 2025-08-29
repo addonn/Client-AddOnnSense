@@ -24,7 +24,9 @@ export class OAuthAuthenticationService {
         private readonly accountService: AccountService,
         private http: HttpClient,
         private storage: Storage
-    ) { }
+    ) { 
+        this.redirectUri = environment.REDIRECTURL;
+    }
 
     async login(accountname: string, isreload: boolean): Promise<User> {
         const account: Account = await this.accountService.getAccountDetails(accountname, isreload);
