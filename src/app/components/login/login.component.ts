@@ -11,6 +11,7 @@ import { OAuthAuthenticationService } from '../../services/oauth.authenticate.se
 import { Account } from '../../models/account';
 import { isPlatformBrowser } from '@angular/common';
 import { StorageService } from '../../services/storage.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-login',
@@ -41,6 +42,7 @@ export class LoginComponent implements OnInit {
   ) {
     this.isBrowser = isPlatformBrowser(platformId);
     this.initializeForm();
+    console.log('Environment Redirect ULR ' + environment.REDIRECTURL)
   }
 
   private async initializeForm() {
